@@ -62,6 +62,6 @@ assessments:
         command: probe
         dependsOn:
           - alias: testreport
-            ref: p://this/transformations/rto-run/testReport
+            ref: p://this/assessments/rto-run/testReport
         parameters:
           testReport: "@testreport"
