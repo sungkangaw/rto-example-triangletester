@@ -8,9 +8,6 @@ stages:
     transformations:
       - buildContainer
       - provisionContainer
-  - name: deployTTGateway
-    transformations:
-      - deployToArtifactory
 
 transformations:
   - name: checkout
