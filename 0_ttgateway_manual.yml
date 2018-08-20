@@ -64,22 +64,6 @@ transformations:
       - alias: buildContainer
         ref: p://this/transformations/buildContainer
 
-  - name: deployToArtifactory
-    service: maven-service
-    command: deploy
-    parameters:
-      workspace: "@repo"
-      assemblies: "@assemble"
-      classes: "@compile"
-    dependsOn:
-      - alias: repo
-        ref: p://this/transformations/checkout/workspace
-      - alias: assemble
-        ref: p://this/transformations/assemble/assembly
-      - ref: p://this/transformations/compile/classes
-        alias: compile
-      - ref: p://this/assessments/jmeter
-
 assessments:
   - name: cobertura
     service: maven-service
