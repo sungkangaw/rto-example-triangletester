@@ -93,24 +93,6 @@ assessments:
       - alias: compile
         ref: p://this/transformations/compile/classes
 
-  - name: jmeter
-    service: jmeter-service
-    command: jmeterTT
-    parameters:
-      jmeterProperties:
-        wildfly_host: "@provision/wildflyIp"
-        wildfly_port: "@provision/wildflyPort"
-        keycloak_host: "@provision/keycloakIp"
-        keycloak_port: "@provision/keycloakPort"
-      testPattern:
-        - "**ttgateway-ftest-2.0.jmx"
-      jmeterTestsRef: "@repo"
-    dependsOn:
-      - alias: repo
-        ref: p://this/transformations/checkout/workspace
-      - alias: provision
-        ref: p://this/transformations/provisionContainer
-
 qualityGates:
   - strategy: auto
     policies:
@@ -125,15 +107,3 @@ qualityGates:
         actualValue: lineCoverage
         setPoint: 0
         assessmentRef: p://this/assessments/cobertura
-
-      - name: AvgResponseTime
-        interpretation: threshold+
-        actualValue: avgResponseTimeMs
-        setPoint: 400
-        assessmentRef: p://this/assessments/jmeter
-
-      - name: ResponseSuccessRate
-        interpretation: threshold-
-        actualValue: successRate
-        setPoint: 0.26
-        assessmentRef: p://this/assessments/jmeter
