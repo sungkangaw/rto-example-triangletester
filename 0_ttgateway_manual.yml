@@ -95,7 +95,7 @@ assessments:
 
   - name: jmeter
     service: jmeter-service
-    command: jmeter
+    command: jmeterTT
     parameters:
       jmeterProperties:
         wildfly_host: "@provision/wildflyIp"
