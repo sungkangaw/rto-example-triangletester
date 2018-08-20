@@ -3,7 +3,6 @@ stages:
     transformations:
       - checkout
       - compile
-      - assemble
       - rto-dist
       - rto-optimize-testtime
     assessments:
