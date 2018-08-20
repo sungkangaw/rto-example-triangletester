@@ -104,7 +104,7 @@ assessments:
         keycloak_port: "@provision/keycloakPort"
       testPattern:
         - "**ttgateway-ftest-2.0.jmx"
-      jmeterTestsRef: "@repo/workspace"
+      jmeterTestsRef: "@repo"
     dependsOn:
       - alias: repo
         ref: p://this/transformations/checkout/workspace
