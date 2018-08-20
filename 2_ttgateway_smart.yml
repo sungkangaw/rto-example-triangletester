@@ -1,0 +1,77 @@
+planner:
+  expand: false
+  hints:
+    - type: schedule
+      target: deployToArtifactory
+      after: jmeter
+
+stages:
+  - name: buildTTGateway
+    transformations:
+      - checkout
+      - compile
+      - assemble
+  - name: bakeTTGateway
+    transformations:
+      - buildContainer
+      - provisionContainer
+  - name: deployTTGateway
+    transformations:
+      - deployToArtifactory
+
+transformations:
+  - name: checkout
+    service: git-service
+    command: checkout
+    parameters:
+      repositoryUri: https://gitlab.traveltainment.int/ttgateway/ttgateway.git
+      branch: pipeline
+
+  - name: compile
+    service: maven-service
+    command: compile
+
+  - name: assemble
+    service: maven-service
+    command: assemble
+
+  - name: buildContainer
+    service: docker-service
+    command: buildTTGateway
+
+  - name: provisionContainer
+    service: docker-service
+    command: provisionTTGateway
+
+  - name: deployToArtifactory
+    service: maven-service
+    command: deploy
+
+assessments:
+  - name: cobertura
+    service: maven-service
+    command: cobertura
+
+  - name: jmeter
+    service: jmeter-service
+    command: jmeterTT
+
+qualityGates:
+  - strategy: auto
+    policies:
+      - name: PassedTestRate
+        interpretation: threshold-
+        actualValue: passedRate
+        setPoint: 1
+      - name: LineCoverage
+        interpretation: threshold-
+        actualValue: lineCoverage
+        setPoint: 0
+      - name: AvgResponseTime
+        interpretation: threshold+
+        actualValue: avgResponseTimeMs
+        setPoint: 400
+      - name: ResponseSuccessRate
+        interpretation: threshold-
+        actualValue: successRate
+        setPoint: 0.26
