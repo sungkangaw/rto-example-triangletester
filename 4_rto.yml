@@ -3,6 +3,7 @@ stages:
     transformations:
       - checkout
       - compile
+      - assemble
       - rto-dist
       - rto-optimize-testtime
 
@@ -21,6 +22,18 @@ transformations:
         ref: p://this/transformations/checkout/workspace
     parameters:
       workspace: "@repo"
+      
+  - name: assemble
+    service: maven-service
+    command: assemble
+    parameters:
+      workspace: "@repo"
+      classes: "@compile"
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+      - alias: compile
+        ref: p://this/transformations/compile/classes
 
   - name: rto-dist
     service: rto-test-service
@@ -39,6 +52,15 @@ transformations:
         ref: p://this/transformations/rto-dist/testClasses
     parameters:
       testRef: "@testclasses"
+      
+  - name: rto-probe
+    service: rto-test-history-probe-service
+    command: probe
+    dependsOn:
+      - alias: testreport
+        ref: p://this/assessments/rto-run/testReport
+    parameters:
+      testReport: "@testreport"
 
 assessments:
   - name: rto-run
@@ -52,12 +74,12 @@ assessments:
     parameters:
       classes: "@compile"
       testOrder: "@testclasses"
-
-  - name: rto-probe
-    service: rto-test-history-probe-service
-    command: probe
-    dependsOn:
-      - alias: testreport
-        ref: p://this/assessments/rto-run/testReport
-    parameters:
-      testReport: "@testreport"
+ 
+qualityGates: 
+  - strategy: auto
+    policies:
+      - name: PassedTestRate
+        interpretation: threshold-
+        actualValue: passedRate
+        setPoint: 0.5
+        assessmentRef: p://this/assessments/rto-run/passedRate
