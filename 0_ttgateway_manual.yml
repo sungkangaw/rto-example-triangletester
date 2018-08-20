@@ -1,0 +1,139 @@
+stages:
+  - name: buildTTGateway
+    transformations:
+      - checkout
+      - compile
+      - assemble
+  - name: bakeTTGateway
+    transformations:
+      - buildContainer
+      - provisionContainer
+  - name: deployTTGateway
+    transformations:
+      - deployToArtifactory
+
+transformations:
+  - name: checkout
+    service: git-service
+    command: checkout
+    parameters:
+      repositoryUri: https://gitlab.example.com/ttgateway/ttgateway.git
+      branch: pipeline
+
+  - name: compile
+    service: maven-service
+    command: compile
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+    parameters:
+      workspace: "@repo"
+
+  - name: assemble
+    service: maven-service
+    command: assemble
+    parameters:
+      workspace: "@repo"
+      classes: "@compile"
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+      - alias: compile
+        ref: p://this/transformations/compile/classes
+
+  - name: buildContainer
+    service: docker-service
+    command: buildTTGateway
+    parameters:
+      workspace: "@repo"
+      javaPackage: "@assemble"
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+      - alias: assemble
+        ref: p://this/transformations/assemble/assembly
+
+  - name: provisionContainer
+    service: docker-service
+    command: provisionTTGateway
+    parameters:
+      wildflyImageName: "@buildContainer/wildflyImage"
+      databaseImageName: "@buildContainer/databaseImage"
+      keycloakImageName: "@buildContainer/keycloakImage"
+    dependsOn:
+      - alias: buildContainer
+        ref: p://this/transformations/buildContainer
+
+  - name: deployToArtifactory
+    service: maven-service
+    command: deploy
+    parameters:
+      workspace: "@repo"
+      assemblies: "@assemble"
+      classes: "@compile"
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+      - alias: assemble
+        ref: p://this/transformations/assemble/assembly
+      - ref: p://this/transformations/compile/classes
+        alias: compile
+      - ref: p://this/assessments/jmeter
+
+assessments:
+  - name: cobertura
+    service: maven-service
+    command: cobertura
+    parameters:
+      workspace: "@repo"
+      classes: "@compile"
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+      - alias: compile
+        ref: p://this/transformations/compile/classes
+
+  - name: jmeter
+    service: jmeter-service
+    command: jmeter
+    parameters:
+      jmeterProperties:
+        wildfly_host: "@provision/wildflyIp"
+        wildfly_port: "@provision/wildflyPort"
+        keycloak_host: "@provision/keycloakIp"
+        keycloak_port: "@provision/keycloakPort"
+      testPattern:
+        - "**ttgateway-ftest-2.0.jmx"
+      jmeterTestsRef: "@repo/workspace"
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+      - alias: provision
+        ref: p://this/transformations/provisionContainer
+
+qualityGates:
+  - strategy: auto
+    policies:
+      - name: PassedTestRate
+        interpretation: threshold-
+        actualValue: passedRate
+        setPoint: 1
+        assessmentRef: p://this/assessments/cobertura
+
+      - name: LineCoverage
+        interpretation: threshold-
+        actualValue: lineCoverage
+        setPoint: 0
+        assessmentRef: p://this/assessments/cobertura
+
+      - name: AvgResponseTime
+        interpretation: threshold+
+        actualValue: avgResponseTimeMs
+        setPoint: 400
+        assessmentRef: p://this/assessments/jmeter
+
+      - name: ResponseSuccessRate
+        interpretation: threshold-
+        actualValue: successRate
+        setPoint: 0.26
+        assessmentRef: p://this/assessments/jmeter
