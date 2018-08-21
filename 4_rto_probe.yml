@@ -5,6 +5,7 @@ stages:
       - compile
       - rto-dist
       - rto-optimize-testtime
+      - rto-probe
 
 transformations:
   - name: checkout
