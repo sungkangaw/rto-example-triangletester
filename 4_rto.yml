@@ -82,4 +82,4 @@ qualityGates:
         interpretation: threshold-
         actualValue: passedRate
         setPoint: 0.5
-        assessmentRef: p://this/assessments/rto-run/passedRate
+        assessmentRef: p://this/assessments/rto-run
