@@ -69,5 +69,5 @@ qualityGates:
       - name: PassedTestRate
         interpretation: threshold-
         actualValue: passedRate
-        setPoint: 0.5
+        setPoint: 0.0
         assessmentRef: p://this/assessments/rto-run
