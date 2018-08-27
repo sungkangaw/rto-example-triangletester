@@ -4,7 +4,7 @@ stages:
       - checkout
       - compile
       - rto-dist
-      - rto-optimize-testtime
+      - rto-optimize-failedtests-selection
 
 transformations:
   - name: checkout
