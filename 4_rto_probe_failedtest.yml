@@ -48,7 +48,7 @@ assessments:
       - alias: compile
         ref: p://this/transformations/compile/classes
       - alias: testclasses
-        ref: p://this/transformations/rto-optimize-testtime/testRef
+        ref: p://this/transformations/rto-optimize-failedtests-selection/testRef
     parameters:
       classes: "@compile"
       testOrder: "@testclasses"
