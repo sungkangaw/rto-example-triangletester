@@ -37,8 +37,11 @@ transformations:
     dependsOn:
       - alias: testclasses
         ref: p://this/transformations/rto-dist/testClasses
+      - alias: model
+        ref: p://this/model/id
     parameters:
-      testRef: "@testclasses"     
+      testRef: "@testclasses"
+      modelId: "@model"
 
 assessments:
   - name: rto-run
@@ -60,8 +63,11 @@ probes:
     dependsOn:
       - alias: testreport
         ref: p://this/assessments/rto-run/testReport
+      - alias: model
+        ref: p://this/model/id
     parameters:
       testReport: "@testreport"
+      modelId: "@model"
  
 qualityGates: 
   - strategy: auto
