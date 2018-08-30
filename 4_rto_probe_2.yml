@@ -73,7 +73,7 @@ probes:
     command: probe
     dependsOn:
       - alias: testreport
-        ref: p://this/assessments/compile/classes
+        ref: p://this/transformations/compile/classes
       - alias: model
         ref: p://this/model/id
     parameters:
