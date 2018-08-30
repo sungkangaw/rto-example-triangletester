@@ -68,6 +68,17 @@ probes:
     parameters:
       testReport: "@testreport"
       modelId: "@model"
+  - name: rto-probe2
+    service: rto-test-history-probe-service
+    command: probe
+    dependsOn:
+      - alias: testreport
+        ref: p://this/assessments/compile/classes
+      - alias: model
+        ref: p://this/model/id
+    parameters:
+      testReport: "@testreport"
+      modelId: "@model"
  
 qualityGates: 
   - strategy: auto
