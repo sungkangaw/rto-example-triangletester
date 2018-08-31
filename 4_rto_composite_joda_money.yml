@@ -13,6 +13,7 @@ transformations:
     command: checkout
     parameters:
       repositoryUri: https://github.com/JodaOrg/joda-money.git
+      branch: coveralls
 
   - name: compile
     service: maven-service
