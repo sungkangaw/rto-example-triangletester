@@ -12,8 +12,7 @@ transformations:
     service: git-service
     command: checkout
     parameters:
-      repositoryUri: https://github.com/JodaOrg/joda-money.git
-      branch: coveralls
+      repositoryUri: https://github.com/JodaOrg/joda-convert.git
 
   - name: compile
     service: maven-service
