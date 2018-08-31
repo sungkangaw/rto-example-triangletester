@@ -12,7 +12,7 @@ transformations:
     service: git-service
     command: checkout
     parameters:
-      repositoryUri: https://github.com/JodaOrg/joda-convert.git
+      repositoryUri: https://github.com/alibaba/fastjson.git
 
   - name: compile
     service: maven-service
