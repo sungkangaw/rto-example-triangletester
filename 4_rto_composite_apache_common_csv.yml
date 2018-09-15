@@ -1,0 +1,92 @@
+stages:
+  - name: buildTTGateway
+    transformations:
+      - checkout
+      - compile
+      - rto-dist
+      - rto-optimize-testtime
+      - rto-optimize-failedfirst
+
+transformations:
+  - name: checkout
+    service: git-service
+    command: checkout
+    parameters:
+      repositoryUri: https://github.com/apache/commons-csv.git
+
+  - name: compile
+    service: maven-service
+    command: compile
+    dependsOn:
+      - alias: repo
+        ref: p://this/transformations/checkout/workspace
+    parameters:
+      workspace: "@repo"
+
+  - name: rto-dist
+    service: rto-test-service
+    command: discover
+    dependsOn:
+      - alias: compile
+        ref: p://this/transformations/compile/classes
+    parameters:
+      classes: "@compile"
+
+  - name: rto-optimize-testtime
+    service: rto-optimize-testexecutiontimeprioritization-service
+    command: optimize
+    dependsOn:
+      - alias: testclasses
+        ref: p://this/transformations/rto-dist/testClasses
+      - alias: model
+        ref: p://this/model/id
+    parameters:
+      testRef: "@testclasses"
+      modelId: "@model"
+      
+  - name: rto-optimize-failedfirst
+    service: rto-optimize-failedfirstprioritization-service
+    command: optimize
+    dependsOn:
+      - alias: testclasses
+        ref: p://this/transformations/rto-optimize-testtime/testRef
+      - alias: model
+        ref: p://this/model/id
+    parameters:
+      testRef: "@testclasses"
+      modelId: "@model"
+
+assessments:
+  - name: rto-run
+    service: rto-test-service
+    command: execute
+    dependsOn:
+      - alias: compile
+        ref: p://this/transformations/compile/classes
+      - alias: testclasses
+        ref: p://this/transformations/rto-optimize-failedfirst/testRef
+    parameters:
+      classes: "@compile"
+      testOrder: "@testclasses"
+      
+probes:
+  - name: rto-probe
+    service: rto-test-history-probe-service
+    command: probe
+    dependsOn:
+      - alias: testreport
+        ref: p://this/assessments/rto-run/testReport
+      - alias: model
+        ref: p://this/model/id
+    parameters:
+      testReport: "@testreport"
+      modelId: "@model"
+ 
+qualityGates: 
+  - strategy: auto
+    policies:
+      - name: PassedTestRate
+        interpretation: threshold-
+        actualValue: passedRate
+        setPoint: 0.9
+        assessmentRef: p://this/assessments/rto-run
